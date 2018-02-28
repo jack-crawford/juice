@@ -1,4 +1,4 @@
-<?php
+session<?php
 // Start the session
 session_start();
 ?>
@@ -132,7 +132,7 @@ session_start();
 
 
 
-      <div><nav class="fixed-nav-bar" id="currenttag" >#all</nav></div>
+      <div><nav class="fixed-nav-bar" id="nav"><p style="float: left" id="back"> </p><p id="currenttag" contenteditable="true" > #all</p></nav></div>
 
       <body>
         <div id="allofit">
@@ -143,7 +143,7 @@ session_start();
             </div>
          </div>
          <div class='userpanel' id="user_stuff">
-            <u style="color: white;"> trending on juice </u></br><!--
+            <u style="color: white;"> welcome to juice! </u></br><!--
            </br> <b> login </b> </br>
              <input type="text" id="user_name_login" contenteditable="true" placeholder="uname"/> </br>
              <input type="password" id="pwd_login" contenteditable="true" placeholder="pwd"/> </br>
@@ -153,7 +153,8 @@ session_start();
          </div>-->
          <a href="juice.html?tag=all"> #all </a></br>
          <a href="juice.html?tag=aboutjuice"> #aboutjuice </a></br>
-         <a href="juice.html?tag=anothertrending"> #another </a> </br>
+         <u style="color: white;"> trending on juice </u></br>
+         <p id="trending"><a href="juice.html?tag=anothertrending"> #another </a> </p></br>
        </div>
          <footer>
            <!--<img id="upload" src="#" alt=""/>-->
@@ -229,7 +230,13 @@ session_start();
 
             $_GET[decode(arguments[1])] = decode(arguments[2]);
         });
-        tag = $_GET['tag'];
+        var cookietag = sessionStorage.tag;
+        console.log(cookietag + " is the cookied tag");
+        if (cookietag === undefined || cookietag === null || cookietag === "null") {
+          tag = $_GET['tag'];
+        } else {
+          tag = cookietag;
+        }
         if(tag === undefined){
           console.log(tag);
           if (tag === undefined) {
@@ -237,12 +244,13 @@ session_start();
             document.getElementById("currenttag").innerHTML = "#" + tag;
 
           } else if (tag!= "all"){
-            document.getElementById("currenttag").innerHTML = "<a href='juice.html?tag=all' id='backbutton'> back</a> #" + tag;
-          }
+            document.getElementById("back").innerHTML = "<a href='juice.html?tag=all' id='backbutton'> back</a> "
+            document.getElementById("currenttag").innerHTML = "#" + tag;          }
         }else {
           console.log(tag);
           if (tag != "all") {
-            document.getElementById("currenttag").innerHTML = "<a href='juice.html?tag=all' id='backbutton'> back</a> #" + tag;
+            document.getElementById("back").innerHTML = "<a href='juice.html?tag=all' id='backbutton'> back</a> "
+            document.getElementById("currenttag").innerHTML = "#" + tag;
           } else {
             document.getElementById("currenttag").innerHTML = "#" + tag;
           }
@@ -277,29 +285,18 @@ session_start();
       check_logins();
       fetch_data();
       input_mod();
+      get_trending();
 
-      function setCookie(name,value,days) {
-          var expires = "";
-          if (days) {
-              var date = new Date();
-              date.setTime(date.getTime() + (days*24*60*60*1000));
-              expires = "; expires=" + date.toUTCString();
+      var elements = document.getElementsByTagName('a');
+      for(var i = 0, len = elements.length; i < len; i++) {
+          elements[i].onclick = function () {
+              // stuff
+              console.log("hey there you clicked a link");
+              sessionStorage.tag = null;
           }
-          document.cookie = name + "=" + (value || "")  + expires + "; path=/";
       }
-      function getCookie(name) {
-          var nameEQ = name + "=";
-          var ca = document.cookie.split(';');
-          for(var i=0;i < ca.length;i++) {
-              var c = ca[i];
-              while (c.charAt(0)==' ') c = c.substring(1,c.length);
-              if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-          }
-          return null;
-      }
-      function eraseCookie(name) {
-          document.cookie = name+'=; Max-Age=-99999999;';
-      }
+
+
 
       $(document).on('click', '#btn_login', function(){
           $.ajax({
@@ -323,6 +320,18 @@ session_start();
              }
           }
        }
+      function get_trending() {
+        $.ajax({
+             url:"select.php?method=get_trending",
+             method:"POST",
+             data:{text:"hello"},
+             dataType:"text",
+             success:function(data) {
+                document.getElementById("trending").innerHTML = data;
+                setTimeout(get_trending, 100000);
+             }
+        });
+      }
       function addtext() {
              var first_name = document.getElementById("text_add").value;
              if(first_name == '') {
@@ -346,6 +355,8 @@ session_start();
                   {
                      scrollr = "not";
                      document.getElementById("text_add").value = "#" + end + " ";
+                     sessionStorage.tag = end;
+
                      fetch_data(end);
                   }
              });
@@ -353,8 +364,8 @@ session_start();
       $(document).on('click', '#btn_add', function(){
            addtext();
       });
-      function edit_data(id, text, column_name)
-      {
+
+      function edit_data(id, text, column_name){
            $.ajax({
                 url:"select.php?method=edit",
                 method:"POST",
@@ -365,12 +376,7 @@ session_start();
                 }
            });
       }
-      $(document).on('blur', '.currenttag', function(){
-          var end_char = StartSearching($("#currenttag"), 1);
-          console.log(end_char + " is end char");
-          var tag = $("#currenttag").substring(1,end_char);
-          console.log(tag);
-      });
+
 
       $(document).on('click', '#button_up', function(){
           var id=$(this).data("id3");
@@ -387,11 +393,21 @@ session_start();
           });
 
       });
-      $( "#text_add" ).keypress(function(e) {
+      $("#text_add").keypress(function(e) {
         if(e.which == 13) {
           addtext();
         }
       });
+      $("#currenttag").keypress(function(e){
+        if(e.which == 13) {
+          sessionStorage.tag = document.getElementById("currenttag").innerHTML.substring(1);
+          console.log(document.getElementById("currenttag").innerHTML.substring(1));
+          fetch_data();
+          return false;
+        }
+      });
+
+
       $(document).on('click', '.btn_down', function(){
            var id=$(this).data("id3");
            if(confirm("Are you sure you want to delete this?"))

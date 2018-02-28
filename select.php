@@ -191,6 +191,20 @@ function edit($connect) {
         echo 'Data Updated';
    }
 }
+function get_trending($connect){
+    $query = "SELECT COUNT(id), hashtag FROM tag_ref WHERE time > DATE_SUB(CURDATE(), INTERVAL 1 WEEK) GROUP BY hashtag ORDER BY COUNT(id) DESC LIMIT 10;";
+    $result = mysqli_query($connect, $query);
+    $trending = "";
+    if(mysqli_num_rows($result) > 0){
+      $rowcount = mysqli_num_rows($result);
+      while($row = mysqli_fetch_array($result)){
+        $tag = $row["hashtag"];
+        $trending = $trending . "<a href='juice.html?tag=$tag'> #$tag </a> </br>";
+      }
+    }
+    echo $trending;
+
+}
 function insert($connect){
   $val = mysqli_real_escape_string($connect, $_POST['text']);
    /* Match hashtags */
@@ -206,9 +220,20 @@ function insert($connect){
   /* Add all matches to array */
    foreach ($quiettags[1] as $quiettag) {
       $hashtags .= $quiettag . ", ";
+      $sql = "INSERT INTO tag_ref(hashtag, locked) VALUES('$quiettag', 'y');";
+      if(mysqli_query($connect, $sql))
+      {
+        echo "succ";
+      }
    }
    foreach ($matches[1] as $match) {
      $hashtags .= $match . ", ";
+     $sql = "INSERT INTO tag_ref(hashtag, locked) VALUES('$match', 'n');";
+     if(mysqli_query($connect, $sql))
+     {
+       echo "ess";
+
+     }
    }
 
    $val = preg_replace("/#(\\w+)/", "<a href=\"juice.html?tag=$1\" id=\"inline_tag\">#$1</a>", $val);
