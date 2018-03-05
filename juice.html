@@ -94,7 +94,7 @@ session_start();
         }
         #backbutton {
           float: left;
-          margin-left: 1%;
+          margin-left: 5%;
           color: white;
         }
         #stufftable {
@@ -143,28 +143,30 @@ session_start();
             </div>
          </div>
          <div class='userpanel' id="user_stuff">
-            <u style="color: white;"> welcome to juice! </u></br><!--
-           </br> <b> login </b> </br>
-             <input type="text" id="user_name_login" contenteditable="true" placeholder="uname"/> </br>
-             <input type="password" id="pwd_login" contenteditable="true" placeholder="pwd"/> </br>
+            <u style="color: white;"> welcome to juice! </u></br>
+            <div id="loginstuff" style="color: white;"> </br> <b> login </b> </br>
+             <input type="text" id="user_name" placeholder="uname"/> </br>
+             <input type="password" id="password" placeholder="pwd"/> </br>
              <button type="button" name="btn_login" id="btn_login" class="btn btn-primary">
                login
              </button>
-         </div>-->
+           </div>
+         </br>
+         <u style="color: white;">useful tags</u></br>
          <a href="juice.html?tag=all"> #all </a></br>
-         <a href="juice.html?tag=aboutjuice"> #aboutjuice </a></br>
+         <a href="juice.html?tag=aboutjuice"> #aboutjuice </a></br></br></br>
          <u style="color: white;"> trending on juice </u></br>
          <p id="trending"><a href="juice.html?tag=anothertrending"> #another </a> </p></br>
        </div>
-         <footer>
+         <footer id="foot">
            <!--<img id="upload" src="#" alt=""/>-->
+           <div style="float: left; width: 80%;">
              <input type="text" id="text_add" contenteditable="true" placeholder="your text here"/>
-             <div style='float:right;'>
                <!--<input type='file' accept='image/*' onchange="readURL(this);" capture='camera' title='image' id="pic_button" style="float: left;"/>-->
-               <button type="button" name="btn_add" id="btn_add" class="btn butt-background" style='float: right;'>
-                 send
-               </button>
-             </div>
+             <button type="button" name="btn_add" id="btn_add" class="btn butt-background" style='float: right;'>
+               send
+             </button>
+           </div>
          </footer>
       </body>
  </html>
@@ -183,21 +185,47 @@ session_start();
             reader.readAsDataURL(input.files[0]);
         }
  }
+ $(document).on('click', '#btn_login', function(){
+    var user = document.getElementById("user_name").value;
+    var pwd = document.getElementById("password").value;
+         $.ajax({
+             type : 'POST',
+             url  : 'select.php?method=l0gin',
+             data :{username:user, password:pwd},
+             dataType:"text",
+             beforeSend: function(){
 
+             },
+             success :  function(data){
+               console.log(user + " " + pwd + " " + data);
+                 if(data==0){
+                    alert("incorrect user and pwd");
+                 }
+                 else {
+                   sessionStorage.user = user;
+                   sessionStorage.userid = data;
+
+                   //reveal text input, remove login box, all that jazz
+                   document.getElementById("loginstuff").innerHTML = "hey there, " + sessionStorage.user;
+                   document.getElementById("foot").style.display = "block";
+
+                 }
+
+             }
+         });
+         return false;
+ });
  $(document).ready(function(){
 
       function check_logins() {
-        $.ajax({
-          url:"select.php?method=checksession",
-          method:"POST",
-          data:{
-            testing:"not relevant"
-          }}).done(function (data) {
-            if(data != "error") {
-              document.getElementById("user_stuff").innerHTML = data;
-            }
+        if (sessionStorage.user != null){
+          document.getElementById("loginstuff").innerHTML = "hey there, " + sessionStorage.user;
+          document.getElementById("foot").style.display = "block";
+        } else {
+          document.getElementById("foot").style.display = "none";
 
-        });
+        }
+
       }
       function input_mod(tag) {
         var $_GET = {};
@@ -244,12 +272,12 @@ session_start();
             document.getElementById("currenttag").innerHTML = "#" + tag;
 
           } else if (tag!= "all"){
-            document.getElementById("back").innerHTML = "<a href='juice.html?tag=all' id='backbutton'> back</a> "
+            document.getElementById("back").innerHTML = "<a href='juice.html?tag=all' id='backbutton'><i class='fa fa-arrow-left'></i></a> "
             document.getElementById("currenttag").innerHTML = "#" + tag;          }
         }else {
           console.log(tag);
           if (tag != "all") {
-            document.getElementById("back").innerHTML = "<a href='juice.html?tag=all' id='backbutton'> back</a> "
+            document.getElementById("back").innerHTML = "<a href='juice.html?tag=all' id='backbutton'><i class='fa fa-arrow-left'></i> </a> "
             document.getElementById("currenttag").innerHTML = "#" + tag;
           } else {
             document.getElementById("currenttag").innerHTML = "#" + tag;
@@ -296,22 +324,6 @@ session_start();
           }
       }
 
-
-
-      $(document).on('click', '#btn_login', function(){
-          $.ajax({
-            url:"select.php?method=login",
-            method:"POST",
-            data:{username:document.getElementById("user_name_login").value,
-                  password:document.getElementById("pwd_login").value,
-                  dataType:"text"}
-                }).done(function (data) {
-              if(data != "error") {
-                document.getElementById("user_stuff").innerHTML = data;
-
-              }
-        })
-      });
       function StartSearching(str, startFrom) {
           for (var i = startFrom; i<str.length;i++) {
             console.log(str[i]);
@@ -349,7 +361,7 @@ session_start();
              $.ajax({
                   url:"select.php?method=insert&tag=" + end,
                   method:"POST",
-                  data:{text:first_name},
+                  data:{text:first_name, userid:sessionStorage.userid},
                   dataType:"text",
                   success:function(data)
                   {
@@ -424,6 +436,7 @@ session_start();
                 });
            }
       });
+
  });
 
  </script>

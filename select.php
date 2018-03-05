@@ -94,6 +94,9 @@ function select($connect) {
     $rowcount = mysqli_num_rows($result);
     $x = 1;
     while($row = mysqli_fetch_array($result)){
+      $userget = "SELECT uname FROM users WHERE id ='".$row['userid']."';";
+      $userresult = mysqli_fetch_array(mysqli_query($connect, $userget));
+      $username = $userresult['uname'];
       if ($row['locked'] == "y") {
         $tags = explode(', ', $row['hashtags']);
         if ($tag == $tags[1]) {
@@ -107,21 +110,25 @@ function select($connect) {
             if ($x == $rowcount) {
               $output .= '
                  <tfoot id="bottomrow">
-                      <td class="text" data-id1="'.$row["id"].'"><span style="float: left">'.$content.'</span>
+                      <td class="text" data-id1="'.$row["id"].'">
+                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>                
+                      <span style="float: left">'.$content.'</span>
                       <span style="float: right"><button type="button" id="button_up" name="up_btn" data-id3="'.$row["id"].'" class="btn btn-xs btn-primary btn_delete"><i class="fa fa-arrow-up"></i></button>
                       '.$count.' </span> </br>
-                      <span style="color: grey">'.$time_since.' </span>
+                      <span style="color: grey"><i>'.$time_since.' </span> </i>
                      </td>
 
                  </tfoot>
             ';
             } else {
               $output .= '
-                 <tr>
-                 <td class="text" data-id1="'.$row["id"].'"><span style="float: left">'.$content.'</span>
+                <tr>
+                <td class="text" data-id1="'.$row["id"].'">
+                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>                
+                <span style="float: left">'.$content.'</span>
                  <span style="float: right"><button type="button" id="button_up" name="up_btn" data-id3="'.$row["id"].'" class="btn btn-xs btn-primary btn_delete"><i class="fa fa-arrow-up"></i></button>
                  '.$count.' </span> </br>
-                 <span style="color: grey">'.$time_since.' </span>
+                 <span style="color: grey"><i>'.$time_since.' </span> </i>
                 </td>
 
                  </tr>
@@ -139,10 +146,12 @@ function select($connect) {
             if ($x == $rowcount) {
               $output .= '
                  <tfoot id="bottomrow">
-                      <td class="text" data-id1="'.$row["id"].'"><span style="float: left">'.$content . $tags[1].'</span>
+                      <td class="text" data-id1="'.$row["id"].'">
+                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>                
+                      <span style="float: left">'.$content . $tags[1].'</span>
                       <span style="float: right"><button type="button" id="button_up" name="up_btn" data-id3="'.$row["id"].'" class="btn btn-xs btn-primary btn_delete"><i class="fa fa-arrow-up"></i></button>
                       '.$count.' </span> </br>
-                      <span style="color: grey">'.$time_since.' </span>
+                      <span style="color: grey"><i>'.$time_since.' </span> </i>
                      </td>
 
                  </tfoot>
@@ -150,10 +159,12 @@ function select($connect) {
             } else {
               $output .= '
                  <tr>
-                 <td class="text" data-id1="'.$row["id"].'"><span style="float: left">'.$content.'</span>
+                 <td class="text" data-id1="'.$row["id"].'">
+                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>                
+                 <span style="float: left">'.$content.'</span>
                  <span style="float: right"><button type="button" id="button_up" name="up_btn" data-id3="'.$row["id"].'" class="btn btn-xs btn-primary btn_delete"><i class="fa fa-arrow-up"></i></button>
                  '.$count.' </span> </br>
-                 <span style="color: grey">'.$time_since.' </span>
+                 <span style="color: grey"><i>'.$time_since.' </span> </i>
                 </td>
 
                  </tr>
@@ -205,9 +216,18 @@ function get_trending($connect){
     echo $trending;
 
 }
+function l0gin($connect){
+  $username = mysqli_real_escape_string($connect, $_POST['username']);
+  $password = mysqli_real_escape_string($connect, $_POST['password']);
+  $query = "SELECT id FROM users WHERE uname = '$username' and password = '$password';";
+  $result = mysqli_fetch_array(mysqli_query($connect, $query));
+  $results = $result['id'];
+  echo $results;
+}
 function insert($connect){
   $val = mysqli_real_escape_string($connect, $_POST['text']);
    /* Match hashtags */
+  $userid = mysqli_real_escape_string($connect, $_POST['userid']);
   preg_match_all('/#(\w+)/', $val, $matches);
   preg_match_all('/%(\w+)/', $val, $quiettags);
   if(!empty($quiettags[1])) {
@@ -221,16 +241,14 @@ function insert($connect){
    foreach ($quiettags[1] as $quiettag) {
       $hashtags .= $quiettag . ", ";
       $sql = "INSERT INTO tag_ref(hashtag, locked) VALUES('$quiettag', 'y');";
-      if(mysqli_query($connect, $sql))
-      {
+      if(mysqli_query($connect, $sql)){
         echo "succ";
       }
    }
    foreach ($matches[1] as $match) {
      $hashtags .= $match . ", ";
      $sql = "INSERT INTO tag_ref(hashtag, locked) VALUES('$match', 'n');";
-     if(mysqli_query($connect, $sql))
-     {
+     if(mysqli_query($connect, $sql)){
        echo "ess";
 
      }
@@ -239,7 +257,7 @@ function insert($connect){
    $val = preg_replace("/#(\\w+)/", "<a href=\"juice.html?tag=$1\" id=\"inline_tag\">#$1</a>", $val);
    $val = preg_replace("/%(\\w+)/", "<a href=\"juice.html?tag=$1\" id=\"inline_tag\">%$1</a>", $val);
 
-   $sql = "INSERT INTO text_content(text, count, hashtags, locked) VALUES('$val', 0, '$hashtags', '$lockval');";
+   $sql = "INSERT INTO text_content(text, count, hashtags, locked, userid) VALUES('$val', 0, '$hashtags', '$lockval', '$userid');";
    if(mysqli_query($connect, $sql))
    {
         echo 'Data Inserted';
