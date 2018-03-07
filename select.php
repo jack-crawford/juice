@@ -107,6 +107,7 @@ function select($connect) {
             if(substr($content, 0, 10) == '<a href="j' && $tag != " all") {
               $content = substr($content, strpos($content, "/a>")+3);
             }
+
             if ($x == $rowcount) {
               $output .= '
                  <tfoot id="bottomrow">
@@ -210,7 +211,7 @@ function get_trending($connect){
       $rowcount = mysqli_num_rows($result);
       while($row = mysqli_fetch_array($result)){
         $tag = $row["hashtag"];
-        $trending = $trending . "<a href='juice.html?tag=$tag'> #$tag </a> </br>";
+        $trending = $trending . "<a href='javascript:void(0);' id='linktag' onclick='linktag(\"$tag\")'> #$tag </a> </br>";
       }
     }
     echo $trending;
@@ -261,15 +262,16 @@ function insert($connect){
 
      }
    }
-
-   $val = preg_replace("/#(\\w+)/", "<a href=\"juice.html?tag=$1\" id=\"inline_tag\">#$1</a>", $val);
-   $val = preg_replace("/%(\\w+)/", "<a href=\"juice.html?tag=$1\" id=\"inline_tag\">%$1</a>", $val);
+   $val = strip_tags($val, '<p><a><b><i><u>');
+   $val = preg_replace("/#(\\w+)/", "<a href=\'javascript:void(0);\' id=\"inline_tag\" onclick=\'linktag(\"$1\")\'>#$1</a>", $val);
+   $val = preg_replace("/%(\\w+)/", "<a href=\'javascript:void(0);\' id=\"inline_tag\" onclick=\'linktag(\"$1\")\'>%$1</a>", $val);
 
    $sql = "INSERT INTO text_content(text, count, hashtags, locked, userid) VALUES('$val', 0, '$hashtags', '$lockval', '$userid');";
    if(mysqli_query($connect, $sql))
    {
         echo 'Data Inserted';
    }
+   echo $sql;
  }
 
 function gethashtags($text) {
