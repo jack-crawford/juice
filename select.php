@@ -111,7 +111,7 @@ function select($connect) {
               $output .= '
                  <tfoot id="bottomrow">
                       <td class="text" data-id1="'.$row["id"].'">
-                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>                
+                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
                       <span style="float: left">'.$content.'</span>
                       <span style="float: right"><button type="button" id="button_up" name="up_btn" data-id3="'.$row["id"].'" class="btn btn-xs btn-primary btn_delete"><i class="fa fa-arrow-up"></i></button>
                       '.$count.' </span> </br>
@@ -124,7 +124,7 @@ function select($connect) {
               $output .= '
                 <tr>
                 <td class="text" data-id1="'.$row["id"].'">
-                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>                
+                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
                 <span style="float: left">'.$content.'</span>
                  <span style="float: right"><button type="button" id="button_up" name="up_btn" data-id3="'.$row["id"].'" class="btn btn-xs btn-primary btn_delete"><i class="fa fa-arrow-up"></i></button>
                  '.$count.' </span> </br>
@@ -147,7 +147,7 @@ function select($connect) {
               $output .= '
                  <tfoot id="bottomrow">
                       <td class="text" data-id1="'.$row["id"].'">
-                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>                
+                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
                       <span style="float: left">'.$content . $tags[1].'</span>
                       <span style="float: right"><button type="button" id="button_up" name="up_btn" data-id3="'.$row["id"].'" class="btn btn-xs btn-primary btn_delete"><i class="fa fa-arrow-up"></i></button>
                       '.$count.' </span> </br>
@@ -160,7 +160,7 @@ function select($connect) {
               $output .= '
                  <tr>
                  <td class="text" data-id1="'.$row["id"].'">
-                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>                
+                      <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
                  <span style="float: left">'.$content.'</span>
                  <span style="float: right"><button type="button" id="button_up" name="up_btn" data-id3="'.$row["id"].'" class="btn btn-xs btn-primary btn_delete"><i class="fa fa-arrow-up"></i></button>
                  '.$count.' </span> </br>
@@ -223,6 +223,14 @@ function l0gin($connect){
   $result = mysqli_fetch_array(mysqli_query($connect, $query));
   $results = $result['id'];
   echo $results;
+}
+function reg($connect){
+  $username = mysqli_real_escape_string($connect, $_POST['username']);
+  $password = mysqli_real_escape_string($connect, $_POST['password']);
+  $query = "INSERT INTO users (uname, password) VALUES ('$username', '$password');";
+  $result = mysqli_query($connect, $query);
+  $id = mysqli_insert_id($connect);
+  echo $id;
 }
 function insert($connect){
   $val = mysqli_real_escape_string($connect, $_POST['text']);
