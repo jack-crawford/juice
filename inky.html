@@ -1,0 +1,298 @@
+<html>
+
+      <head>
+
+           <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+           <title id="title">inky</title>
+           <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+           <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+           <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+           <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+           <script>
+           var scrollr = "not";
+           var scrollpos = 0;
+           function readURL(input) {
+                  if (input.files && input.files[0]) {
+                      var reader = new FileReader();
+
+                      reader.onload = function (e) {
+                          $('#upload')
+                              .attr('src', e.target.result)
+                      };
+
+                      reader.readAsDataURL(input.files[0]);
+                  }
+           }
+
+           function fetch_data(tag){
+             $.ajax({
+                  url:"inky.php?method=select&user_id="+sessionStorage.userid,
+                  method:"POST",
+                  success:function(data){
+                       $('#live_data').html(data);
+                      }
+                 });
+           }
+           $(document).on('click', '#btn_login', function(){
+              var user = document.getElementById("user_name").value;
+              var pwd = document.getElementById("password").value;
+                   $.ajax({
+                       type : 'POST',
+                       url  : 'inky.php?method=l0gin',
+                       data :{username:user, password:pwd},
+                       dataType:"text",
+                       beforeSend: function(){
+
+                       },
+                       success :  function(data){
+                         console.log(user + " " + pwd + " " + data);
+                           if(data==0){
+                              alert("incorrect user and pwd");
+                           }
+                           else {
+                             sessionStorage.user = user;
+                             sessionStorage.userid = data;
+                             fetch_data();
+                             //reveal text input, remove login box, all that jazz
+                             document.getElementById("loginstuff").innerHTML = "hey there, " + sessionStorage.user;
+
+                           }
+
+                       }
+                   });
+                   return false;
+           });
+
+           $(document).on('click', '#btn_reg', function(){
+              var user = document.getElementById("user_name_new").value;
+              var pwd = document.getElementById("password_new").value;
+              var pwd_rep = document.getElementById("password_new_repeat").value;
+              if (pwd === pwd_rep) {
+                   $.ajax({
+                       type : 'POST',
+                       url  : 'inky.php?method=reg',
+                       data :{username:user, password:pwd},
+                       dataType:"text",
+                       beforeSend: function(){
+
+                       },
+                       success :  function(data){
+                         console.log(user + " " + pwd + " " + data);
+                           if(data==0){
+                              alert("incorrect user and pwd");
+                           }
+                           else {
+                             sessionStorage.user = user;
+                             sessionStorage.userid = data;
+
+                             //reveal text input, remove login box, all that jazz
+                             document.getElementById("loginstuff").innerHTML = "welcome to inky, " + sessionStorage.user;
+                             fetch_data();
+                           }
+
+                       }
+                   });
+                   return false;
+                 } else {
+                   alert("passwords don't match you idiot");
+                 }
+           });
+           $(document).ready(function(){
+                function check_logins() {
+                  if (sessionStorage.user != null){
+                    document.getElementById("loginstuff").innerHTML = "hey there, " + sessionStorage.user;
+                    fetch_data();
+                  } else {
+                    document.getElementById("foot").style.display = "none";
+                  }
+                }
+                check_logins();
+                fetch_data();
+
+                $(document).on('blur', '#your_work', function() {
+                  var contents = document.getElementById("your_work").innerHTML;
+                  console.log(contents)
+                  var idddqd = $(this).data("id1");
+                  console.log("data is "+ idddqd);
+                  $.ajax({
+                       url:"inky.php?method=edit",
+                       method:"POST",
+                       data:{post_id:idddqd, user_id:sessionStorage.userid, text:contents},
+                       dataType:"text",
+                       success:function(data){
+                            console.log(data);
+                       }
+                  });
+                });
+
+
+
+
+
+           });
+
+           </script>
+
+      </head>
+      <style>
+
+        html,body { margin: 0; background-color: #222222;}
+        body {
+          margin-bottom: 10%;
+        }
+        nav { height: 5.75%; background: linear-gradient(to bottom, black, #222222); color: white; text-align: center; font-size: 175%;}
+        footer { height: 5%; position: fixed; bottom: 0; width: 100%; background:#222222;}
+        #wrap { background: gray; position: absolute; bottom: 20px; top: 20px; right: 3%; left: 3% }
+        #wrap .content { height: 75%; position: fixed; bottom: 6%;}
+        .butt-background {background-color:linear-gradient(to right, #222222, black);}
+
+        table  tbody{
+
+          display:block;
+
+          overflow:scroll;;//set tbody to auto
+
+        }
+        #logincenter {
+          text-align: center;
+          width: auto;
+        }
+        #tabbble {
+          position: fixed;
+          bottom: 5%;
+          width: 80%;
+          overflow-y:scroll;
+          height: 90%;
+          top: 5.75%;
+          background-color: #222222;
+        }
+
+        .fixed-nav-bar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: 9999;
+          width: 100%;
+        }
+        a {
+
+            color: white;
+
+        }
+        @media screen and (max-width: 600px) {
+          #user_stuff {
+            visibility: hidden;
+
+          }
+          #tabbble {
+            width: 10with0%;
+            margin: auto;
+          }
+          #live_data {
+            width: 100%;
+          }
+          #stufftable {
+            width: 100%;
+          }
+        }
+        #userpanel {
+          height: 150%;
+          overflow: hidden;
+        }
+        #text_add {
+          color: white;
+          font-size: 150%;
+          text-align: left;
+          width: 50%;
+          margin-left: 3%;
+          background-color: inherit;
+          float: left;
+          border: none;
+          border-color: transparent;
+          ::placeholder {
+              color: white;
+              opacity: 1; /* Firefox */
+          }
+        }
+        #pic_button {
+          background-color: #668ac4;
+          width: 50%;
+        }
+        #backbutton {
+          float: left;
+          margin-left: 5%;
+          color: white;
+        }
+        #stufftable {
+          color: white;
+        }
+        #inline_tag {
+          color: white;
+        }
+
+        .content {
+          float: left;
+          width: 80%;
+          height: 89.25%;
+          margin-top: 5.75%;
+          overflow: scroll;
+        }
+        tr {
+            border-left: none;
+            border-right: none;
+        }
+        #user_stuff {
+          float: right;
+          width: 20%;
+          background-color:linear-gradient(to right, #222222, black);
+          height: 100%;
+          padding: 1%;
+
+        }
+        #allofit {
+          margin-top: 3.75%;
+          width: 100%
+
+        }
+      }
+      </style>
+
+
+
+      <div><nav class="fixed-nav-bar" id="nav"><p style="float: left" id="back"> </p><p id="currenttag">inky</p></nav></div>
+
+      <body>
+        <div id="allofit">
+        <div class='content' id="scrollable">
+            <div class="table-responsive" style="width: 100%;">
+                 <div id="live_data">
+                   <div id="logincenter" style="color: white;">
+                     <u style="color: white;"> welcome to inky! </u></br>
+                     </br> <b> login </b> </br>
+                    <input type="text" id="user_name" placeholder="uname" style="background-color: #222222;"/> </br>
+                    <input type="password" id="password" placeholder="pwd" style="background-color: #222222;"/> </br>
+                    <button type="button" name="btn_login" id="btn_login" class="btn btn-primary">
+                      login
+                    </button> </br> </br>
+                    <b> Register </b> </br>
+                    <input type="text" id="user_name_new" placeholder="uname" style="background-color: #222222;"/> </br>
+                    <input type="password" id="password_new" placeholder="pwd" style="background-color: #222222;"/> </br>
+                    <input type="password" id="password_new_repeat" placeholder="repeat" style="background-color: #222222;"/> </br>
+                    <button type="button" name="btn_reg" id="btn_reg" class="btn btn-primary">
+                      start!
+                    </button>
+                  </div>
+                 </div>
+            </div>
+         </div>
+         <div class='userpanel' id="user_stuff">
+            <u style="color: white;"> </u></br>
+            <div id="loginstuff" style="color: white;"></br>
+
+           </div>
+         </br>
+
+
+       </div>
+      </body>
+ </html>
