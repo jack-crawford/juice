@@ -97,6 +97,21 @@
                    alert("passwords don't match you idiot");
                  }
            });
+           $(document).on('click', '#btn_new_entry', function(){
+              var user_id = sessionStorage.userid;
+              console.log("clicked new");
+               $.ajax({
+                   type : 'POST',
+                   url  : 'inky.php?method=newpost',
+                   data :{userid:user_id},
+                   dataType:"text",
+                   success :  function(data){
+                     console.log("succ");
+                     fetch_data();
+                   }
+               });
+
+           });
            $(document).ready(function(){
                 function check_logins() {
                   if (sessionStorage.user != null){
@@ -110,7 +125,7 @@
                 fetch_data();
 
                 $(document).on('blur', '#your_work', function() {
-                  var contents = document.getElementById("your_work").innerHTML;
+                  var contents = $(this).text(); 
                   console.log(contents)
                   var idddqd = $(this).data("id1");
                   console.log("data is "+ idddqd);

@@ -36,7 +36,7 @@ function time_elapsed_string($datetime, $full = false) {
 }
 function select($connect) {
   $user_id = $_GET['user_id'];
-  $sql = "SELECT * FROM work WHERE user_id = $user_id ORDER BY id DESC;";
+  $sql = "SELECT * FROM work WHERE user_id = $user_id ORDER BY id;";
 
   $result = mysqli_query($connect, $sql);
 
@@ -47,19 +47,27 @@ function select($connect) {
   if(mysqli_num_rows($result) > 0){
     $rowcount = mysqli_num_rows($result);
     $x = 1;
-    while($row = mysqli_fetch_array($result)){
+    $row = mysqli_fetch_array($result);
+    while($row){
       $userget = "SELECT uname FROM users WHERE id ='".$row['user_id']."';";
       $userresult = mysqli_fetch_array(mysqli_query($connect, $userget));
       $username = $userresult['uname'];
-
       $content = $row['content'];
       if ($x == $rowcount) {
         $output .= '
+          <tr>
+          <td class="text" data-id1="'.$row["id"].'">
+          <span style="color: white; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
+          <span style="float: left" id="your_work" data-id1="'.$row["id"].'" contenteditable="true">'.$content.'</span>
+         </td>
+
+           </tr>
            <tfoot id="bottomrow">
-                <td class="text">
-                <span style="color: white; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
-                <span style="float: left" id="your_work" data-id1="'.$row["id"].'" contenteditable="true">'.$content.'</span>
-               </td>
+                <td class="text" style="text-align: center;">
+                  <button type="button" name="btn_new_entry" id="btn_new_entry" class="btn btn-info">
+                    new
+                  </button>
+                </td>
 
            </tfoot>
       ';
@@ -76,8 +84,7 @@ function select($connect) {
 
       }
 
-
-
+      $row = mysqli_fetch_array($result);
       $x ++;
     }
     $output .= '
@@ -107,6 +114,11 @@ function edit($connect) {
    {
         echo "Data Updated + $sql";
    }
+}
+function newpost($connect) {
+   $id = $_POST["userid"];
+   $starter = "INSERT INTO work (user_id, content) VALUES ($id, 'hey there! edit this!');";
+   $result = mysqli_query($connect, $starter);
 }
 function get_trending($connect){
     $query = "SELECT COUNT(id), hashtag FROM tag_ref WHERE time > DATE_SUB(CURDATE(), INTERVAL 1 WEEK) GROUP BY hashtag ORDER BY COUNT(id) DESC LIMIT 10;";
