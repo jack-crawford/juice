@@ -53,13 +53,25 @@ function select($connect) {
       $userresult = mysqli_fetch_array(mysqli_query($connect, $userget));
       $username = $userresult['uname'];
       $content = $row['content'];
+      $contentt = '<td class="text" data-id1="'.$row["id"].'">
+      <span style="color: white; font-size:75%; float:left;"<b>'.$username.':</b></span>
+      <div class="dropdown" style="float: right; width: auto; text-align: center;">
+        <span><i class="fa fa-bars"></i></span>
+        <div class="dropdown-content">
+        <button type="button" name="btn_del" data-id1="'.$row["id"].'"" id="btn_del" class="btn btn-danger">
+        <i class="fa fa-trash"></i>
+        </button>
+        <!--<button type="button" name="btn_crypto" data-id1="'.$row["id"].'" id="btn_crypto" class="btn btn-warning">
+        <i class="fa fa-lock"></i>
+        </button>-->
+        </div>
+      </div></br>
+      <span style="float: left" id="your_work" data-id1="'.$row["id"].'" contenteditable="true">'.$content.'</span>
+     </td>';
       if ($x == $rowcount) {
         $output .= '
           <tr>
-          <td class="text" data-id1="'.$row["id"].'">
-          <span style="color: white; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
-          <span style="float: left" id="your_work" data-id1="'.$row["id"].'" contenteditable="true">'.$content.'</span>
-         </td>
+          '.$contentt.'
 
            </tr>
            <tfoot id="bottomrow">
@@ -74,10 +86,7 @@ function select($connect) {
       } else {
           $output .= '
             <tr>
-            <td class="text" data-id1="'.$row["id"].'">
-            <span style="color: white; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
-            <span style="float: left" id="your_work" data-id1="'.$row["id"].'" contenteditable="true">'.$content.'</span>
-           </td>
+            '.$contentt.'
 
              </tr>
         ';
@@ -101,7 +110,7 @@ function select($connect) {
    echo $output;
 }
 function delete($connect) {
-  $sql = "DELETE FROM text_content WHERE id = '".$_POST["id"]."'";
+  $sql = "DELETE FROM work WHERE id = '".$_POST["post_id"]."'";
   if(mysqli_query($connect, $sql)){
       echo 'Data Deleted';
   }
