@@ -162,7 +162,7 @@ function get_groups($connect){
     $groupname = $userresult['group_name'];
     $output .= "<a href='javascript:void(0);' id='groupname' onclick='groupswitch(\"$group_id\")'>$groupname</a></br>";
   }
-  $output .="<div>
+  $output .="<div> <u><h6>want more groups?!</h6></u>
     <a href='javascript:void(0);' id='joingroup' onclick='joingroup()'>join a new group!</a></br>
     <a href='javascript:void(0);' id='creategroup' onclick='newgroup()'>create one</a>
     </div>
@@ -177,18 +177,22 @@ function select($connect) {
         <div class="table-responsive" id="tabbble">
              <table class="table table-bordered" id="stufftable">
                   ';
+  if(!empty($group_id) && $group_id != "undefined") {
     $output .= '<tr><td class="text">
-      <div style="float: left; width: 90%;">
+      <div style="float: left; width: 50%;">
+
       <input type="text" id="text_add" contenteditable="true" placeholder="text here!"/>
-      <img id="blah" src="#" alt="" />
-      <div style="float: right; width: 10%;">
       <button type="button" name="btn_add" id="btn_add" class="btn btn-primary">
         post!
       </button>
+      </div>
+      <div style="float: right; width: 50%;">
+        <input type="file" onclick="reveal();" id="imgs" name="img" accept="image/*"/>
 
 
-         <input type="file" onchange="readURL(this);" id="imgs" name="img" />
-      <button type="button" name="btn_add" id="btn_img" onclick="chooseFile();" class="btn btn-primary">
+
+
+      <button type="button" name="btn_add" id="btn_img" style="display:none;" onclick="chooseFile();" class="btn btn-primary">
         <i class="fa fa-upload"></i>
 
       </button>
@@ -197,6 +201,8 @@ function select($connect) {
       </div>
       </td>
       </tr>';
+    }
+
     $idnum = $group_id;
 
     $query = "SELECT posts.* FROM posts WHERE group_id = '$group_id' ORDER BY post_datetime DESC;";
@@ -212,17 +218,31 @@ function select($connect) {
       $username = $userresult['username'];
 
       $content = $row['post_text_content'];
-      $output .= '
-        <tr>
-        <td class="text" data-id1="'.$row["id"].'">
-              <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
-        <span style="float: left">'.$content.'</span>
-        </br>
-         <span style="color: grey"><i>'.$time_since.' </span> </i>
-        </td>
+      if ($row['post_type'] == "text") {
+          $output .= '
+            <tr>
+            <td class="text" data-id1="'.$row["id"].'">
+                  <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
+            <span style="float: left">'.$content.'</span>
+            </br>
+             <span style="color: grey"><i>'.$time_since.' </span> </i>
+            </td>
 
-         </tr>
-    ';
+             </tr>
+        ';
+      } elseif ($row['post_type'] == "meme" && !empty($content)) {
+        $output .= '
+          <tr>
+          <td class="text" data-id1="'.$row["id"].'">
+                <span style="color: #efefef; font-size:75%; float:left;"<b>'.$username.':</b></span> </br>
+          <span style="float: left"><img style="max-height:250px; max-width:500px;" src="/tangle/tangleweb/uploads/'.$content.'"></span>
+          </br>
+           <span style="color: grey"><i>'.$time_since.' </span> </i>
+          </td>
+
+           </tr>
+        ';
+      }
       $x ++;
 
 
@@ -264,12 +284,33 @@ function get_trending($connect){
 
 }
 function image_upload($connect){
+
   $user_id = $_GET['user_id'];
   $group_id = $_GET['group_id'];
-  $sourcePath = $_FILES['file']['tmp_name'];       // Storing source path of the file in a variable
-  $targetPath = "uploads/".$_FILES['file']['name']; // Target path where file is to be stored
-  move_uploaded_file($sourcePath,$targetPath) ;
-  echo $_FILES['file']['name'];
+  if ( $_FILES['file']['error'] > 0 ){
+       echo 'Error: ' . $_FILES['file']['error'] . '<br>';
+   }
+   else {
+     echo $_FILES['file']['name'];
+     if(is_writeable('uploads/' . $_FILES['file']['name'])){
+       echo "this is writeable";
+     } else{
+       echo "this is not";
+     }
+
+      $query = "INSERT INTO posts (user_id, group_id, post_type, post_datetime) VALUES ('$user_id', '$group_id', 'meme', NOW());";
+      $result = mysqli_query($connect, $query);
+      $post_id = mysqli_insert_id($connect);
+
+       if(move_uploaded_file($_FILES['file']['tmp_name'], "uploads/$post_id.jpg"))
+       {
+         $query2 = "UPDATE posts SET post_text_content = '$post_id.jpg' WHERE post_id = $post_id;";
+         $result = mysqli_query($connect, $query2);
+           echo "File Uploaded Successfully";
+       } else {
+         echo "dicknuts";
+       }
+   }
 }
 function l0gin($connect){
   $username = mysqli_real_escape_string($connect, $_POST['username']);

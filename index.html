@@ -86,11 +86,16 @@
                   url:"/tangle/tangleweb/tangle.php?method=get_top_group&user_id=" + sessionStorage.userid,
                   method:"POST",
                   success:function(data){
+                      if(data){
                       sessionStorage.groupid = data;
                       console.log("the group id= " + sessionStorage.groupid);
                        //setTimeout(fetch_data, 10000);
                        location.reload();
-                      }
+
+                    } else {
+
+                    }
+                  }
                  });
             }
              console.log(sessionStorage.groupid + " is the session group id");
@@ -181,15 +186,23 @@
                    alert("passwords don't match you idiot");
                  }
            });
+           function reveal() {
+             var uploadButton = document.getElementById('btn_img');
+             uploadButton.style.display = "block";
+           }
            function chooseFile() {
              var fileSelect = document.getElementById('imgs');
              var uploadButton = document.getElementById('btn_img');
              uploadButton.innerHTML = 'Uploading...';
              var formData = new FormData();
+             formData.append('file', file_data);
+             var file_data = $('#imgs').prop('files')[0];
+             formData.append('file', file_data);
+
              $.ajax({
                 url: "/tangle/tangleweb/tangle.php?method=image_upload&user_id=" + sessionStorage.userid + "&group_id=" + sessionStorage.groupid, // Url to which the request is send
                 type: "POST",             // Type of request to be send, called as method
-                data: new FormData(this), // Data sent to server, a set of key/value pairs (i.e. form fields and values)
+                data: formData, // Data sent to server, a set of key/value pairs (i.e. form fields and values)
                 contentType: false,       // The content type used when sending data to the server.
                 cache: false,             // To unable request pages to be cached
                 processData:false,        // To send DOMDocument or non processed data file it is set to false
@@ -197,6 +210,10 @@
                 {
                   console.log(data);
                   console.log("something happened");
+                  console.log(this);
+                  uploadButton.innerHTML = '<i class="fa fa-upload"></i>';
+                  uploadButton.style.display = "none";
+                  fetch_data();
                 }
               });
            }
@@ -343,8 +360,8 @@
         body {
           margin-bottom: 10%;
         }
-        nav { height: 5.75%; background: linear-gradient(to right, #242d3a, #1c2735); color: white; text-align: center; font-size: 175%;}
-        footer { height: 5%; position: fixed; bottom: 0; width: 100%; background:#383838;}
+        nav { height: 5.75%; background: black; color: white; text-align: center; font-size: 175%;}
+        footer { height: 5%; position: fixed; bottom: 0; width: 100%; background:black;}
         #wrap { background: gray; position: absolute; bottom: 20px; top: 20px; right: 3%; left: 3% }
         #wrap .content { height: 75%; position: fixed; bottom: 6%;}
         .butt-background {background-color:linear-gradient(to right, #72ffd2, #12e856);}
@@ -464,7 +481,7 @@
 
 
 
-      <div><nav class="fixed-nav-bar" id="nav">tangle</nav></div>
+      <div><nav class="fixed-nav-bar"><div style="float: left;"><img src="/tangle/tangleweb/tangle.png" style="max-height: 25px; padding: 1%;"><b>tangle</b></div><div id="nav">tangle</div></nav></div>
       <body>
         <div id="allofit">
           <div class='userpanel' id="group_stuff">
